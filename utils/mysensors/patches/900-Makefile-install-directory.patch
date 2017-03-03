@@ -1,0 +1,11 @@
+--- a/Makefile
++++ b/Makefile
+@@ -136,7 +136,7 @@ install: all install-gateway install-ini
+ 
+ install-gateway: 
+ 	@echo "Installing $(GATEWAY) to ${DESTDIR}$(GATEWAY_DIR)"
+-	@install -m 0755 $(GATEWAY) ${DESTDIR}$(GATEWAY_DIR)
++	@install -D -m 0755 $(GATEWAY) ${DESTDIR}$(GATEWAY_DIR)/mysgw
+ 
+ install-initscripts:
+ ifeq ($(INIT_SYSTEM), systemd)

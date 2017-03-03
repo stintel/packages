@@ -1,0 +1,13 @@
+#!/bin/sh /etc/rc.common
+
+USE_PROCD=1
+
+start_service() {
+	mkdir -p /var/lib/mysensors
+	chown nobody /var/lib/mysensors
+
+	procd_open_instance
+	procd_set_param command /usr/bin/mysgw
+	procd_set_param user nobody
+	procd_close_instance
+}
