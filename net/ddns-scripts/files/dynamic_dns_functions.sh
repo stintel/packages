@@ -75,6 +75,7 @@ LUCI_HELPER=$(printf %s "$MYPROG" | grep -i "luci")
 # Name Server Lookup Programs
 BIND_HOST=$(command -v host)
 KNOT_HOST=$(command -v khost)
+UNBOUND_HOST=$(command -v unbound-host)
 DRILL=$(command -v drill)
 HOSTIP=$(command -v hostip)
 NSLOOKUP=$(command -v nslookup)
@@ -513,6 +514,9 @@ verify_host_port() {
 		elif [ -n "$KNOT_HOST" ]; then	# use Knot host if installed
 			__PROG="Knot host"
 			__RUNPROG="$KNOT_HOST $__HOST >$DATFILE 2>$ERRFILE"
+		elif [ -n "$UNBOUND_HOST" ]; then	# use Unbound host if installed
+			__PROG="UNBOUND host"
+			__RUNPROG="$UNBOUND_HOST $__HOST >$DATFILE 2>$ERRFILE"
 		elif [ -n "$DRILL" ]; then	# use drill if installed
 			__PROG="drill"
 			__RUNPROG="$DRILL -V0 $__HOST A >$DATFILE 2>$ERRFILE"			# IPv4
@@ -535,7 +539,7 @@ verify_host_port() {
 			return 2
 		}
 		# extract IP address
-		if [ -n "$BIND_HOST" -o -n "$KNOT_HOST" ]; then	# use BIND host or Knot host if installed
+		if [ -n "$BIND_HOST" -o -n "$KNOT_HOST" -o -n "$UNBOUND_HOST" ]; then	# use BIND host or Knot host or Unbound host if installed
 			__IPV4="$(awk -F "address " '/has address/ {print $2; exit}' "$DATFILE")"
 			__IPV6="$(awk -F "address " '/has IPv6/ {print $2; exit}' "$DATFILE")"
 		elif [ -n "$DRILL" ]; then	# use drill if installed
@@ -1087,6 +1091,16 @@ get_registered_ip() {
 
 		__RUNPROG="$__PROG $lookup_host $dns_server >$DATFILE 2>$ERRFILE"
 		__PROG="Knot host"
+	elif [ -n "$UNBOUND_HOST" ]; then
+		__PROG="$UNBOUND_HOST"
+		[ $use_ipv6 -eq 0 ] && __PROG="$__PROG -t A"  || __PROG="$__PROG -t AAAA"
+		if [ $force_ipversion -eq 1 ]; then			# force IP version
+			[ $use_ipv6 -eq 0 ] && __PROG="$__PROG -4"  || __PROG="$__PROG -6"
+		fi
+		[ $force_dnstcp -eq 1 ] && __PROG="$__PROG -T"	# force TCP
+
+		__RUNPROG="$__PROG $lookup_host $dns_server >$DATFILE 2>$ERRFILE"
+		__PROG="Unbound host"
 	elif [ -n "$DRILL" ]; then
 		__PROG="$DRILL -V0"			# drill options name @server type
 		if [ $force_ipversion -eq 1 ]; then			# force IP version
@@ -1146,7 +1160,7 @@ get_registered_ip() {
 			write_log 3 "$__PROG error: '$__ERR'"
 			write_log 7 "$(cat $ERRFILE)"
 		else
-			if [ -n "$BIND_HOST" -o -n "$KNOT_HOST" ]; then
+			if [ -n "$BIND_HOST" -o -n "$KNOT_HOST" -o -n "$UNBOUND_HOST" ]; then
 				if [ $is_glue -eq 1 ]; then
 					__DATA=$(cat $DATFILE | grep "^$lookup_host" | grep -om1 "$__REGEX" )
 				else
