@@ -175,7 +175,7 @@ MARIADB_COMMON_DEPENDS := \
 
 # Pass CPPFLAGS in the CFLAGS as otherwise the build system will
 # ignore them.
-TARGET_CFLAGS+=$(TARGET_CPPFLAGS)
+TARGET_CFLAGS+=$(TARGET_CPPFLAGS) -I$(STAGING_DIR)/usr/include
 
 ifneq ($(CONFIG_USE_MUSL),)
   TARGET_CFLAGS += -D_LARGEFILE64_SOURCE
