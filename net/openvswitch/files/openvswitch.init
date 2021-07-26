@@ -95,6 +95,29 @@ ovs_xx() {
 	esac
 }
 
+ovs_bridge_parse_datapath_id() {
+	local dpid dpif dpnet
+
+	case "$1" in
+		@*)
+			dpnet="${1##@}"
+			dpif="$(uci -q get network."${dpnet}".device)"
+			dpid="6f77$(cat /sys/class/net/${dpif}/address 2>/dev/null | sed 's/://g')"
+			;;
+		*)
+			dpid="$1"
+			;;
+	esac
+
+	if expr "$dpid" : '[[:xdigit:]]\{16\}$' > /dev/null; then
+		datapath_id="$dpid"
+		return 0
+	else
+		logger -t openvswitch "invalid datapath_id: $dpid"
+		return 1
+	fi
+}
+
 ovs_bridge_parse_port() {
 	case "$1" in
 		*:*)
@@ -183,6 +206,13 @@ ovs_bridge_init() {
 
 	config_get name "$cfg" name $cfg
 	ovs-vsctl --may-exist add-br "$name"
+
+	config_get datapath_id "$cfg" datapath_id
+	[ -n "$datapath_id" ] && {
+		ovs_bridge_parse_datapath_id "$datapath_id" && {
+			ovs-vsctl --if-exists set bridge "$name" other-config:datapath-id="$datapath_id"
+		}
+	}
 
 	config_list_foreach "$cfg" "ports" ovs_bridge_port_add
 	config_foreach ovs_bridge_port_add_complex ovs_port "$name"
