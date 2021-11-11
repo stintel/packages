@@ -9,7 +9,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=miniupnpd
 PKG_VERSION:=2.2.3
-PKG_RELEASE:=2
+PKG_RELEASE:=3
 
 PKG_SOURCE_URL:=https://miniupnp.tuxfamily.org/files
 PKG_HASH:=f89c310ce9575183af3fec61af65e548f85114133df8caaaa9e204c13b7a9da5

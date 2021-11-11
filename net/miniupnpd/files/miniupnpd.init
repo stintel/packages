@@ -202,5 +202,9 @@ start_service() {
 }
 
 service_triggers() {
+	local internal_iface
+	config_load "upnpd"
+	config_get internal_iface config "internal_iface"
+	procd_add_interface_trigger "interface.*" "$internal_iface" /etc/init.d/miniupnpd restart
 	procd_add_reload_trigger "upnpd"
 }
