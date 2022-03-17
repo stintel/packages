@@ -79,7 +79,7 @@ CONFIGURE_ARGS += \
 	--disable-gost \
 	--enable-ecdsa \
 	--with-drill \
-	--with-examples \
+	--without-examples \
 	--with-ssl="$(STAGING_DIR)/usr"
 
 define Build/InstallDev
