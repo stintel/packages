@@ -53,6 +53,15 @@ define Package/net-tools-netstat/description
 	functionality of the net-tools variant.
 endef
 
+define Package/net-tools-ifconfig
+  SECTION:=net
+  CATEGORY:=Network
+  TITLE:=net-tools - ifconfig utility
+  URL:=http://net-tools.sourceforge.net/
+  PROVIDES:=ifconfig
+  ALTERNATIVES:=300:/sbin/ifconfig:/usr/libexec/net-tools-ifconfig
+endef
+
 define Package/net-tools-route
   SECTION:=net
   CATEGORY:=Network
@@ -85,11 +94,17 @@ define Package/net-tools-netstat/install
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/netstat $(1)/usr/libexec/net-tools-netstat
 endef
 
+define Package/net-tools-ifconfig/install
+	$(INSTALL_DIR) $(1)/usr/libexec
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/ifconfig $(1)/usr/libexec/net-tools-ifconfig
+endef
+
 define Package/net-tools-route/install
 	$(INSTALL_DIR) $(1)/usr/libexec
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/route $(1)/usr/libexec/net-tools-route
 endef
 
 $(eval $(call BuildPackage,mii-tool))
+$(eval $(call BuildPackage,net-tools-ifconfig))
 $(eval $(call BuildPackage,net-tools-netstat))
 $(eval $(call BuildPackage,net-tools-route))
