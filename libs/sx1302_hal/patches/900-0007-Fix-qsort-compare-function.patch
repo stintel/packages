@@ -1,0 +1,98 @@
+From c3d99009556fdfe273c3a53306082ef181333c7a Mon Sep 17 00:00:00 2001
+From: Orne Brocaar <info@brocaar.com>
+Date: Thu, 5 Oct 2023 12:02:36 +0100
+Subject: [PATCH 7/7] Fix qsort compare function.
+
+This fixes the sqort compare function after the qsort_r to qsort
+refactor. This refactor was needed as qsort_r is not available when
+compiling against musl.
+
+Fixes https://github.com/chirpstack/chirpstack-concentratord/issues/107.
+---
+ libloragw/src/loragw_hal.c      | 13 +++----------
+ packet_forwarder/src/jitqueue.c | 23 +++++++----------------
+ 2 files changed, 10 insertions(+), 26 deletions(-)
+
+diff --git a/libloragw/src/loragw_hal.c b/libloragw/src/loragw_hal.c
+index 04c0fec..2587208 100644
+--- a/libloragw/src/loragw_hal.c
++++ b/libloragw/src/loragw_hal.c
+@@ -300,19 +300,12 @@ static int remove_pkt(struct lgw_pkt_rx_s * p, uint8_t * nb_pkt, uint8_t pkt_ind
+ 
+ /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+ 
+-int compare_pkt_tmst(const void *a, const void *b, void *arg)
++int compare_pkt_tmst(const void *a, const void *b)
+ {
+-    struct lgw_pkt_rx_s *p = (struct lgw_pkt_rx_s *)a;
+-    struct lgw_pkt_rx_s *q = (struct lgw_pkt_rx_s *)b;
+-    int *counter = (int *)arg;
+     int p_count, q_count;
+ 
+-    p_count = p->count_us;
+-    q_count = q->count_us;
+-
+-    if (p_count > q_count) {
+-        *counter = *counter + 1;
+-    }
++    p_count = ((struct lgw_pkt_rx_s *)a)->count_us;
++    q_count = ((struct lgw_pkt_rx_s *)b)->count_us;
+ 
+     return (p_count - q_count);
+ }
+diff --git a/packet_forwarder/src/jitqueue.c b/packet_forwarder/src/jitqueue.c
+index 22ec701..d15690c 100644
+--- a/packet_forwarder/src/jitqueue.c
++++ b/packet_forwarder/src/jitqueue.c
+@@ -15,8 +15,7 @@ License: Revised BSD License, see LICENSE.TXT file include in the project
+ /* -------------------------------------------------------------------------- */
+ /* --- DEPENDANCIES --------------------------------------------------------- */
+ 
+-#define _GNU_SOURCE     /* needed for qsort_r to be defined */
+-#include <stdlib.h>     /* qsort_r */
++#include <stdlib.h>     /* qsort */
+ #include <stdio.h>      /* printf, fprintf, snprintf, fopen, fputs */
+ #include <string.h>     /* memset, memcpy */
+ #include <pthread.h>
+@@ -88,32 +87,24 @@ void jit_queue_init(struct jit_queue_s *queue) {
+     pthread_mutex_unlock(&mx_jit_queue);
+ }
+ 
+-int compare(const void *a, const void *b, void *arg)
++int compare(const void *a, const void *b)
+ {
+-    struct jit_node_s *p = (struct jit_node_s *)a;
+-    struct jit_node_s *q = (struct jit_node_s *)b;
+-    int *counter = (int *)arg;
+     int p_count, q_count;
+ 
+-    p_count = p->pkt.count_us;
+-    q_count = q->pkt.count_us;
++    p_count = ((struct lgw_pkt_rx_s *)a)->count_us;
++    q_count = ((struct lgw_pkt_rx_s *)b)->count_us;
+ 
+-    if (p_count > q_count)
+-        *counter = *counter + 1;
+-
+-    return p_count - q_count;
++    return (p_count - q_count);
+ }
+ 
+ void jit_sort_queue(struct jit_queue_s *queue) {
+-    int counter = 0;
+-
+     if (queue->num_pkt == 0) {
+         return;
+     }
+ 
+     MSG_DEBUG(DEBUG_JIT, "sorting queue in ascending order packet timestamp - queue size:%u\n", queue->num_pkt);
+-    qsort_r(queue->nodes, queue->num_pkt, sizeof(queue->nodes[0]), compare, &counter);
+-    MSG_DEBUG(DEBUG_JIT, "sorting queue done - swapped:%d\n", counter);
++    qsort(queue->nodes, queue->num_pkt, sizeof(queue->nodes[0]), compare);
++    MSG_DEBUG(DEBUG_JIT, "sorting queue done - swapped\n");
+ }
+ 
+ bool jit_collision_test(uint32_t p1_count_us, uint32_t p1_pre_delay, uint32_t p1_post_delay, uint32_t p2_count_us, uint32_t p2_pre_delay, uint32_t p2_post_delay) {
+-- 
+2.43.0
+

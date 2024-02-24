@@ -1,0 +1,35 @@
+From 4ee9b67db4b51c6544f65cca3f26a0bbc8284f16 Mon Sep 17 00:00:00 2001
+From: Orne Brocaar <info@brocaar.com>
+Date: Mon, 19 Dec 2022 12:35:29 +0000
+Subject: [PATCH 5/7] Handle TMP-102 temperature sensor.
+
+---
+ libloragw/src/loragw_stts751.c | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/libloragw/src/loragw_stts751.c b/libloragw/src/loragw_stts751.c
+index 7766961..a39fd4d 100644
+--- a/libloragw/src/loragw_stts751.c
++++ b/libloragw/src/loragw_stts751.c
+@@ -66,6 +66,7 @@ License: Revised BSD License, see LICENSE.TXT file include in the project
+ 
+ #define STTS751_0_PROD_ID       0x00
+ #define STTS751_1_PROD_ID       0x01
++#define TMP_102_PROD_ID         0x06
+ #define ST_MAN_ID               0x53
+ 
+ /* -------------------------------------------------------------------------- */
+@@ -102,6 +103,10 @@ int stts751_configure(int i2c_fd, uint8_t i2c_addr) {
+         case STTS751_1_PROD_ID:
+             DEBUG_MSG("INFO: Product ID: STTS751-1\n");
+             break;
++        case TMP_102_PROD_ID:
++            DEBUG_MSG("INFO: Product ID: TMP-102\n");
++            // No further configuration is required.
++            return LGW_I2C_SUCCESS;
+         default:
+             printf("ERROR: Product ID: UNKNOWN\n");
+             return LGW_I2C_ERROR;
+-- 
+2.43.0
+

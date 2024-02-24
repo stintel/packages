@@ -1,0 +1,53 @@
+From cb2aac3f2d14e55366bb59586c21ab32b0a03a7e Mon Sep 17 00:00:00 2001
+From: Orne Brocaar <info@brocaar.com>
+Date: Thu, 21 Apr 2022 20:22:25 +0100
+Subject: [PATCH 2/7] Fix double closing i2c bus. Indent fix.
+
+---
+ libloragw/src/loragw_hal.c | 16 +++++++++-------
+ 1 file changed, 9 insertions(+), 7 deletions(-)
+
+diff --git a/libloragw/src/loragw_hal.c b/libloragw/src/loragw_hal.c
+index 9460b35..85eae42 100644
+--- a/libloragw/src/loragw_hal.c
++++ b/libloragw/src/loragw_hal.c
+@@ -1114,7 +1114,7 @@ int lgw_start(void) {
+         }
+         if (i == sizeof I2C_PORT_TEMP_SENSOR) {
+             printf("ERROR: no temperature sensor found.\n");
+-			// For RAK2287 this is expected to fail as it has no temperature sensor.
++            // For RAK2287 this is expected to fail as it has no temperature sensor.
+             // return LGW_HAL_ERROR;
+         }
+ 
+@@ -1223,11 +1223,13 @@ int lgw_stop(void) {
+     }
+ 
+     if (CONTEXT_COM_TYPE == LGW_COM_SPI) {
+-        DEBUG_MSG("INFO: Closing I2C for temperature sensor\n");
+-        x = i2c_linuxdev_close(ts_fd);
+-        if (x != 0) {
+-            printf("ERROR: failed to close I2C temperature sensor device (err=%i)\n", x);
+-            err = LGW_HAL_ERROR;
++        if (ts_fd != -1) {
++            DEBUG_MSG("INFO: Closing I2C for temperature sensor\n");
++            x = i2c_linuxdev_close(ts_fd);
++            if (x != 0) {
++                printf("ERROR: failed to close I2C temperature sensor device (err=%i)\n", x);
++                err = LGW_HAL_ERROR;
++            }
+         }
+ 
+         if (CONTEXT_BOARD.full_duplex == true) {
+@@ -1291,7 +1293,7 @@ int lgw_receive(uint8_t max_pkt, struct lgw_pkt_rx_s *pkt_data) {
+     res = lgw_get_temperature(&current_temperature);
+     if (res != LGW_I2C_SUCCESS) {
+         printf("ERROR: failed to get current temperature\n");
+-		// For RAK2287 this is expected to fail as it has no temperature sensor.
++        // For RAK2287 this is expected to fail as it has no temperature sensor.
+         // return LGW_HAL_ERROR;
+     }
+ 
+-- 
+2.43.0
+

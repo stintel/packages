@@ -1,0 +1,36 @@
+From 89fa9a03e7138264f9131e8668a592c31464f08d Mon Sep 17 00:00:00 2001
+From: Orne Brocaar <info@brocaar.com>
+Date: Wed, 14 Apr 2021 15:03:47 +0100
+Subject: [PATCH 1/7] Add workaround for RAK2287 boards.
+
+---
+ libloragw/src/loragw_hal.c | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/libloragw/src/loragw_hal.c b/libloragw/src/loragw_hal.c
+index ffc8ec0..9460b35 100644
+--- a/libloragw/src/loragw_hal.c
++++ b/libloragw/src/loragw_hal.c
+@@ -1114,7 +1114,8 @@ int lgw_start(void) {
+         }
+         if (i == sizeof I2C_PORT_TEMP_SENSOR) {
+             printf("ERROR: no temperature sensor found.\n");
+-            return LGW_HAL_ERROR;
++			// For RAK2287 this is expected to fail as it has no temperature sensor.
++            // return LGW_HAL_ERROR;
+         }
+ 
+         /* Configure ADC AD338R for full duplex (CN490 reference design) */
+@@ -1290,7 +1291,8 @@ int lgw_receive(uint8_t max_pkt, struct lgw_pkt_rx_s *pkt_data) {
+     res = lgw_get_temperature(&current_temperature);
+     if (res != LGW_I2C_SUCCESS) {
+         printf("ERROR: failed to get current temperature\n");
+-        return LGW_HAL_ERROR;
++		// For RAK2287 this is expected to fail as it has no temperature sensor.
++        // return LGW_HAL_ERROR;
+     }
+ 
+     /* Iterate on the RX buffer to get parsed packets */
+-- 
+2.43.0
+

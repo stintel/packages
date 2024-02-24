@@ -1,0 +1,46 @@
+From 9aef4ac4a6739e25fcaa901612121820934044f8 Mon Sep 17 00:00:00 2001
+From: Orne Brocaar <info@brocaar.com>
+Date: Wed, 31 May 2023 14:48:09 +0100
+Subject: [PATCH 6/7] Replace qsort_r by qsort.
+
+---
+ libloragw/src/loragw_hal.c | 9 ++++-----
+ 1 file changed, 4 insertions(+), 5 deletions(-)
+
+diff --git a/libloragw/src/loragw_hal.c b/libloragw/src/loragw_hal.c
+index 3c7541a..04c0fec 100644
+--- a/libloragw/src/loragw_hal.c
++++ b/libloragw/src/loragw_hal.c
+@@ -23,8 +23,8 @@ License: Revised BSD License, see LICENSE.TXT file include in the project
+     #define _XOPEN_SOURCE 500
+ #endif
+ 
+-#define _GNU_SOURCE     /* needed for qsort_r to be defined */
+-#include <stdlib.h>     /* qsort_r */
++#define _GNU_SOURCE
++#include <stdlib.h>
+ 
+ #include <stdint.h>     /* C99 types */
+ #include <stdbool.h>    /* bool type */
+@@ -326,7 +326,6 @@ static int merge_packets(struct lgw_pkt_rx_s * p, uint8_t * nb_pkt) {
+     int pkt_idx;
+ #endif
+     bool dup_restart = false;
+-    int counter_qsort_swap = 0;
+ 
+     /* Check input parameters */
+     CHECK_NULL(p);
+@@ -420,8 +419,8 @@ static int merge_packets(struct lgw_pkt_rx_s * p, uint8_t * nb_pkt) {
+     }
+ 
+     /* Sort the packet array by ascending counter_us value */
+-    qsort_r(p, cpt, sizeof(p[0]), compare_pkt_tmst, &counter_qsort_swap);
+-    DEBUG_PRINTF("%d elements swapped during sorting...\n", counter_qsort_swap);
++    qsort(p, cpt, sizeof(p[0]), compare_pkt_tmst);
++    DEBUG_PRINTF("%d elements sorted...\n");
+ 
+     /* --------------------------------------------- */
+     /* ---------- For Debug only - START ----------- */
+-- 
+2.43.0
+
