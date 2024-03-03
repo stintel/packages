@@ -1,0 +1,35 @@
+diff --git a/libloragw-sx1302/build.rs b/libloragw-sx1302/build.rs
+index c50d238..d7c5733 100644
+--- a/libloragw-sx1302/build.rs
++++ b/libloragw-sx1302/build.rs
+@@ -5,7 +5,7 @@ use std::path::PathBuf;
+ 
+ fn main() {
+     // Tell cargo to tell rustc to link the sx1302 HAL library + tinymt32 dependency.
+-    println!("cargo:rustc-link-lib=loragw-sx1302");
++    println!("cargo:rustc-link-lib=loragw");
+     println!("cargo:rustc-link-lib=tinymt32");
+ 
+     // The bindgen::Builder is the main entry point
+@@ -17,6 +17,8 @@ fn main() {
+         .header("wrapper.h")
+         // Derive Default.
+         .derive_default(true)
++        // Clang arguments
++        .clang_arg(format!("--include-directory={}/usr/include", env::var("STAGING_DIR").unwrap()))
+         // Finish the builder and generate the bindings.
+         .generate()
+         // Unwrap the Result and panic on failure.
+diff --git a/libloragw-sx1302/wrapper.h b/libloragw-sx1302/wrapper.h
+index ae214b6..b05f19b 100644
+--- a/libloragw-sx1302/wrapper.h
++++ b/libloragw-sx1302/wrapper.h
+@@ -1,5 +1,5 @@
+ #include <stdio.h>
+ 
+-#include <libloragw-sx1302/loragw_com.h>
+-#include <libloragw-sx1302/loragw_hal.h>
+-#include <libloragw-sx1302/loragw_gps.h>
++#include <lgw/loragw_com.h>
++#include <lgw/loragw_hal.h>
++#include <lgw/loragw_gps.h>
