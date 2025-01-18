@@ -29,7 +29,9 @@ PKG_LICENSE_FILES:=COPYING
 include $(INCLUDE_DIR)/package.mk
 include $(INCLUDE_DIR)/cmake.mk
 
-CMAKE_OPTIONS += -DUSE_BACKEND=nftables
+CMAKE_OPTIONS += \
+	-DCMAKE_BUILD_TYPE=Release \
+	-DUSE_BACKEND=nftables
 
 define Package/vallumd
   SECTION:=net
