@@ -19,7 +19,6 @@ PKG_LICENSE:=MIT BSD-3-Clause-Clear
 PKG_CPE_ID:=cpe:/a:net-snmp:net-snmp
 
 PKG_FIXUP:=autoreconf
-PKG_LTO:=0
 
 include $(INCLUDE_DIR)/package.mk
 
